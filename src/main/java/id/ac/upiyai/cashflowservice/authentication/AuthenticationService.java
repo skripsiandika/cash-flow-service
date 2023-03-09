@@ -1,5 +1,6 @@
 package id.ac.upiyai.cashflowservice.authentication;
 
+import id.ac.upiyai.cashflowservice.authentication.model.Role;
 import id.ac.upiyai.cashflowservice.authentication.model.Token;
 import id.ac.upiyai.cashflowservice.authentication.model.User;
 import id.ac.upiyai.cashflowservice.authentication.model.request.SignInRequest;
@@ -16,7 +17,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -29,13 +32,23 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthorizationResponse register(SignUpRequest request) {
-        User user = User.builder()
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .roleType(RoleType.SME)
-                .build();
+        Set<Role> roles = new HashSet<>();
+        Role role = new Role();
+        role.setRoleId(1);
+        role.setRoleName(RoleType.SME);
+        roles.add(role);
+        User user = new User();
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setEmail(request.getEmail());
+        user.setUsername(request.getUsername());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setIsExpired(true);
+        user.setIsLocked(true);
+        user.setIsEnabled(true);
+        user.setIsCredentialsExpired(true);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRoles(roles);
 
         User savedUser = repository.save(user);
         String jwtToken = jwtService.generateToken(user);
